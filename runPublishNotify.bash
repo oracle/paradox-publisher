@@ -38,3 +38,8 @@ echo "Publishing to Couch"
 {
     ./publishToCouch.bash "$assembly" "$guid" "$username" "$password" <<< "$publishCredentials" || { echo "Failed to publish to couch"; }
 }
+
+echo "Publishing to Infinity"
+{
+    ./publishToInfinity.bash "$assembly" "$guid" || { echo "Failed to publish to Infinity"; }
+}   
