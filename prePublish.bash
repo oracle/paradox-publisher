@@ -56,8 +56,8 @@ results.tests.find { it.performance }.each {
     ).data
 
     if (perfResult) {
-        def lastPerfTest = perfResult.rows[-1].value.findAll().toArray() as double[]
-        def currentPerfTest = it.performance.findAll().toArray() as double[]
+        def lastPerfTest = perfResult.rows[-1].value as StatisticalSummary
+        def currentPerfTest = it.performance as StatisticalSummary
 
         if (currentPerfTest && lastPerfTest) {
             def tTestResult = TestUtils.tTest(lastPerfTest, currentPerfTest, 0.05d)
