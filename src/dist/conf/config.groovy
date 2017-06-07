@@ -1,0 +1,12 @@
+// The file will be officially populated by chef, but this is an empty reference copy for testing
+autoUrl = ''
+couchUrl = ''
+jiraUrl = ''
+scsUrl = ''
+zapiUrl = ''
+jiraUsername = ''
+jiraPassword = ''
+jiraProjectKey = ''
+jiraProjectId = ''
+hipchatToken = ''
+hipchatUrl = ''

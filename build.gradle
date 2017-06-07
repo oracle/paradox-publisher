@@ -1,0 +1,45 @@
+plugins {
+    id 'groovy'
+    id 'idea'
+    id 'application'
+    id 'codenarc'
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile localGroovy()
+    compile 'log4j:log4j:1.2.+'
+    compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.+'
+    compile 'org.apache.commons:commons-math3:3.+'
+}
+
+codenarc {
+    toolVersion = '0.27.0'
+    configFile = new File('conf/codenarc.groovy')
+    maxPriority1Violations = 0
+    maxPriority2Violations = 0
+    maxPriority3Violations = 0
+    reportFormat = project.properties.'codenarc.reportFormat' ?: 'html'
+}
+
+mainClassName = 'NoClassName'
+['prePublish', 'publishToCouch', 'publishToInfinity', 'publishToJira', 'runTests'].each { name ->
+    task "${name}StartScripts"(type: CreateStartScripts) {
+        mainClassName = name
+        applicationName = name
+        outputDir = new File('src/dist/bin')
+        classpath = startScripts.classpath
+        distZip.dependsOn "${name}StartScripts"
+
+        // The classpath generated in the .bat script lists all the jars.
+        // This shortens it using a wildcard
+        // Needed to prevent "input line is too long" errors running from windows cmd shell
+        doLast {
+            def scriptFile = file "${outputDir}/${name}.bat"
+            scriptFile.text = scriptFile.text.replaceFirst(/(set CLASSPATH=.*?\\lib\\).*/,/$1*/)
+        }
+    }
+}
