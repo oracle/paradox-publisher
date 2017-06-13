@@ -9,21 +9,21 @@ class RunTests {
     static rest = new RESTClient(Config.autoUrl, 'application/json')
 
     static void main(String[] args) {
-        def cli = new CliBuilder(usage: 'runTests [-a assembly] [-t testsToRun] [-e environment]')
+        def cli = new CliBuilder(usage: 'runTests')
         cli.with {
-            a longOpt: 'assembly', args: 1, 'The name of the test suite run or publish'
-            e longOpt: 'environment', args: 1, 'The environment to run the tests against'
-            t longOpt: 'testsToRun', args: 1, 'The commands to pass to the test suite'
+            a required: true, longOpt: 'assembly', args: 1, 'The name of the test suite run or publish'
+            e required: true, longOpt: 'environment', args: 1, 'The environment to run the tests against'
             h longOpt: 'help', 'Show usage information'
+            t required: true, longOpt: 'testsToRun', args: 1, 'The commands to pass to the test suite'
+        }
+
+        if (args?.grep(['-h', '--help'])) {
+            cli.usage()
+            return
         }
 
         def options = cli.parse(args)
         if (!options) {
-            return
-        }
-
-        if (options.h) {
-            cli.usage()
             return
         }
 

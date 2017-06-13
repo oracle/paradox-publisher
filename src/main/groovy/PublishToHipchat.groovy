@@ -10,10 +10,16 @@ class PublishToHipchat {
     static hipchat = new RESTClient(Config.hipchatUrl, 'application/json')
 
     static void main(String[] args) {
-        def cli = new CliBuilder(usage: 'publishToHipchat [-a assembly] [-g guid]')
+        def cli = new CliBuilder(usage: 'publishToHipchat')
         cli.with {
-            a longOpt: 'assembly', args: 1, 'The name of the test suite to publish'
-            g longOpt: 'guid', args: 1, 'The guid of the test suite to publish'
+            a required: true, longOpt: 'assembly', args: 1, 'The name of the test suite to publish'
+            g required: true, longOpt: 'guid', args: 1, 'The guid of the test suite to publish'
+            h longOpt: 'help', 'Show usage information'
+        }
+
+        if (args?.grep(['-h', '--help'])) {
+            cli.usage()
+            return
         }
 
         def options = cli.parse(args)

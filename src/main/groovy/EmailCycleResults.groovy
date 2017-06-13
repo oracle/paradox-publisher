@@ -9,15 +9,20 @@ class EmailCycleResults {
     static zapi = new RESTClient(Config.zapiUrl, 'application/json')
 
     static void main(String[] args) {
-        def cli = new CliBuilder(usage: 'emailCycleResults [-a assembly] [-g guid]')
+        def cli = new CliBuilder(usage: 'emailCycleResults')
         cli.with {
+            c required: true, longOpt: 'cycleId', args: 1, 'The id of the cycle to export'
+            f required: true, longOpt: 'footer', args: 1 'The footer/bottom line of the email'
             h longOpt: 'help', 'Show usage information'
-            c longOpt: 'cycleId', args: 1, 'The id of the cycle to export'
-            m longOpt: 'email', args: 1 'The email address(es) results will be sent to'
-            s longOpt: 'email', args: 1 'The subject line of the email'
-            t longOpt: 'email', args: 1 'The header/top line of the email'
-            f longOpt: 'email', args: 1 'The footer/bottom line of the email'
-            v longOpt: 'version', args: 1, 'The version of the cycle to export'
+            m required: true, longOpt: 'email', args: 1 'The email address(es) results will be sent to'
+            s required: true, longOpt: 'subject', args: 1 'The subject line of the email'
+            t required: true, longOpt: 'header', args: 1 'The header/top line of the email'
+            v required: true, longOpt: 'version', args: 1, 'The version of the cycle to export'
+        }
+
+        if (args?.grep(['-h', '--help'])) {
+            cli.usage()
+            return
         }
 
         def options = cli.parse(args)
@@ -32,18 +37,18 @@ class EmailCycleResults {
         def basicAuth = 'Basic ' + "$Config.jiraUsername:$Config.jiraPassword".bytes.encodeBase64()
         zapi.headers += [Authorization: basicAuth]
 
+        log.info "Fetching cycle ($cycleId) from jira for project ($Config.jiraProjectId) and version ($versionId)"
         def exportUrl = zapi.get(
             path: '/cycle/$cycleId/export',
             query: [projectId: Config.jiraProjectId, versionId: versionId]).url
         log.debug exportUrl
-        log.info "Fetching cycle ($cycleId) from jira for project ($Config.jiraProjectId) and version ($versionId)"
         def dataRaw = zapi.get(uri: exportUrl)
 
         def pass = dataRaw.count { it.contains(',PASS,') }
         def fail = dataRaw.count { it.contains(',FAIL,') }
         def skipped = dataRaw.count { it.contains(',UNEXECUTED,') }
         def inconclusive = dataRaw.count { it.contains(',BLOCKED,') }
-        def knownfail = dataRaw.count { it.contains(',KNOWNFAIL,') }
+        def knownfail = dataRaw.count { it.contains(',KNOWN FAIL,') }
         def total = pass + fail + skipped + inconclusive + knownfail
         log.debug """\
             |summary:

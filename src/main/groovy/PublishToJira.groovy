@@ -12,12 +12,17 @@ class PublishToJira {
     static zapi = new RESTClient(Config.zapiUrl, 'application/json')
     static cache = [:]
     static void main(String[] args) {
-        def cli = new CliBuilder(usage: 'publishToJira [-a assembly] [-g guid] [-v version]')
+        def cli = new CliBuilder(usage: 'publishToJira')
         cli.with {
+            a required: true, longOpt: 'assembly', args: 1, 'The name of the test suite to publish'
+            g required: true, longOpt: 'guid', args: 1, 'The guid of the test suite to publish'
             h longOpt: 'help', 'Show usage information'
-            a longOpt: 'assembly', args: 1, 'The name of the test suite to publish'
-            g longOpt: 'guid', args: 1, 'The guid of the test suite to publish'
-            v longOpt: 'version', args: 1, 'The version for the jira cycle that will be created'
+            v required: true, longOpt: 'version', args: 1, 'The version for the jira cycle that will be created'
+        }
+
+        if (args?.grep(['-h', '--help'])) {
+            cli.usage()
+            return
         }
 
         def options = cli.parse(args)

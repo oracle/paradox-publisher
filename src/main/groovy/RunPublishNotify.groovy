@@ -3,24 +3,23 @@
  */
 class RunPublishNotify {
     static void main(String[] args) {
-        def cli = new CliBuilder(
-            usage: 'runPublishNotify [-h] [-a assembly] [-e environment] [-m email] [-t testsToRun] [-v version]')
+        def cli = new CliBuilder(usage:'runPublishNotify')
         cli.with {
+            a required: true, longOpt: 'assembly', args: 1, 'The name of the test suite run or publish'
+            e required: true, longOpt: 'environment', args: 1, 'The environment to run the tests against'
             h longOpt: 'help', 'Show usage information'
-            a longOpt: 'assembly', args: 1, 'The name of the test suite run or publish'
-            e longOpt: 'environment', args: 1, 'The environment to run the tests against'
-            m longOpt: 'email', args: 1 'The email address(es) results will be sent to'
-            t longOpt: 'testsToRun', args: 1, 'The commands to pass to the test suite'
-            v longOpt: 'version', args: 1, 'The version for the jira cycle that will be created'
+            m required: true, longOpt: 'email', args: 1, 'The email address(es) results will be sent to'
+            t required: true, longOpt: 'testsToRun', args: 1, 'The commands to pass to the test suite'
+            v required: true, longOpt: 'version', args: 1, 'The version for the jira cycle that gets created'
+        }
+
+        if (args?.grep(['-h', '--help'])) {
+            cli.usage()
+            return
         }
 
         def options = cli.parse(args)
         if (!options) {
-            return
-        }
-
-        if (options.h) {
-            cli.usage()
             return
         }
 

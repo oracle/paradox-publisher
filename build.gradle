@@ -13,6 +13,7 @@ dependencies {
     compile localGroovy()
     compile 'log4j:log4j:1.2.+'
     compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.+'
+    compile 'commons-cli:commons-cli:1.4'
     compile 'org.apache.commons:commons-math3:3.+'
 }
 
@@ -26,13 +27,14 @@ codenarc {
 }
 
 mainClassName = 'NoClassName'
-['prePublish', 'publishToCouch', 'publishToInfinity', 'publishToJira', 'runTests'].each { name ->
+['runPublishNotify', 'runTests', 'prePublish', 'publishToCouch',
+    'publishToInfinity', 'publishToJira', 'publishToHipchat'].each { name ->
     task "${name}StartScripts"(type: CreateStartScripts) {
-        mainClassName = name
+        mainClassName = name.capitalize()
         applicationName = name
         outputDir = new File('src/dist/bin')
         classpath = startScripts.classpath
-        distZip.dependsOn "${name}StartScripts"
+        startScripts.dependsOn "${name}StartScripts"
 
         // The classpath generated in the .bat script lists all the jars.
         // This shortens it using a wildcard
