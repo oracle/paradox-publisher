@@ -13,6 +13,7 @@ class RunPublishNotify {
                 | <assembly>     The name of the test suite to run and publish
                 | <environment>  The environment to run the tests against
                 | <testsToRun>   The commandline parameters to pass to the test suite
+                |
                 |options:'''.stripMargin()
         )
         cli.with {
