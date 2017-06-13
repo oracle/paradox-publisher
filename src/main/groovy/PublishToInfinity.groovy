@@ -5,33 +5,16 @@ import groovy.util.logging.Log4j
  * Publish results to infinity analytics
  */
 @Log4j
-class PublishToInfinity {
+class PublishToInfinity implements Publisher {
     static final PUBLISHER_VERSION = '0.1'
-    static auto = new RESTClient(Config.autoUrl, 'application/json')
-    static scs = new RESTClient().with { parser.'image/gif' = parser.defaultParser; it }
+    def auto = new RESTClient(config.autoUrl, 'application/json')
+    def scs = new RESTClient().with { parser.'image/gif' = parser.defaultParser; it }
 
     static void main(String[] args) {
-        def cli = new CliBuilder(usage: 'publishToInfinity')
-        cli.with {
-            a required: true, longOpt: 'assembly', args: 1, 'The name of the test suite run or publish'
-            g required: true, longOpt: 'guid', args: 1, 'The guid of the test suite to publish'
-            h longOpt: 'help', 'Show usage information'
-        }
-
-        if (args?.grep(['-h', '--help'])) {
-            cli.usage()
-            return
-        }
-
-        def options = cli.parse(args)
-        if (!options) {
-            return
-        }
-
-        publish(options.a, options.g)
+        new PublishToInfinity().parseCommandline(args)
     }
 
-    static sendEvent(Map event) {
+    def sendEvent(Map event) {
         event << [
             dcsref: 'paradox',
             publisherVersion: PUBLISHER_VERSION,
@@ -40,11 +23,11 @@ class PublishToInfinity {
             .findAll { it.value }
             .collectEntries { [it.key, URLEncoder.encode(it.value as String, 'UTF-8')] }
             .collect { "$it.key=$it.value" }.join('&')
-        scs.get(uri: "$Config.scsUrl?$queryString", headers: ['User-Agent': 'paradoxRestClient'])
+        scs.get(uri: "$config.scsUrl?$queryString", headers: ['User-Agent': 'paradoxRestClient'])
     }
 
-    static void publish(String assemblyName, String executionGuid) {
-        log.info "Fetching results from ${auto.defaultURI}results/$assemblyName/$executionGuid ..."
+    def publish(String assemblyName, String executionGuid) {
+        log.info "Fetching results from ${auto.uri}results/$assemblyName/$executionGuid ..."
         def results = auto.get(path: "results/$assemblyName/$executionGuid").data
         log.info "Results = $results"
 

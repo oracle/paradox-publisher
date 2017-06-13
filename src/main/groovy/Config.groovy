@@ -2,7 +2,7 @@
  * Parses the config file into a typesafe object
  */
 class Config {
-    static {
+    Config() {
         ConfigSlurper slurper = new ConfigSlurper()
         def configFile = new File('conf/config.groovy')
         def config = slurper.parse(configFile.text)
@@ -19,15 +19,15 @@ class Config {
         hipchatUrl = config.hipchatUrl
     }
 
-    static String autoUrl
-    static String couchUrl
-    static String jiraUrl
-    static String scsUrl
-    static String jiraUsername
-    static String jiraPassword
-    static String zapiUrl
-    static String jiraProjectKey
-    static String jiraProjectId
-    static String hipchatToken
-    static String hipchatUrl
+    String autoUrl
+    String couchUrl
+    String jiraUrl
+    String scsUrl
+    String jiraUsername
+    String jiraPassword
+    String zapiUrl
+    String jiraProjectKey
+    String jiraProjectId
+    String hipchatToken
+    String hipchatUrl
 }

@@ -28,7 +28,7 @@ codenarc {
 
 mainClassName = 'NoClassName'
 ['runPublishNotify', 'runTests', 'prePublish', 'publishToCouch',
-    'publishToInfinity', 'publishToJira', 'publishToHipchat'].each { name ->
+    'publishToInfinity', 'publishToJira', 'publishToHipchat', 'emailCycleResults'].each { name ->
     task "${name}StartScripts"(type: CreateStartScripts) {
         mainClassName = name.capitalize()
         applicationName = name

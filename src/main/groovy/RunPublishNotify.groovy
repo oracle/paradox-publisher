@@ -1,16 +1,24 @@
+import org.apache.commons.cli.Option
+
 /**
  * Runs a test suite, publishes the results to jira, couchdb and infinity, and emails interested parties
  */
 class RunPublishNotify {
+    def config = new Config()
     static void main(String[] args) {
-        def cli = new CliBuilder(usage:'runPublishNotify')
+        def cli = new CliBuilder(
+            usage: '''runPublishNotify [-h] [-e <emails>...] <assembly> <environment> -- <testsToRun>...
+                |
+                |arguments:
+                | <assembly>     The name of the test suite to run and publish
+                | <environment>  The environment to run the tests against
+                | <testsToRun>   The commandline parameters to pass to the test suite
+                |options:'''.stripMargin()
+        )
         cli.with {
-            a required: true, longOpt: 'assembly', args: 1, 'The name of the test suite run or publish'
-            e required: true, longOpt: 'environment', args: 1, 'The environment to run the tests against'
             h longOpt: 'help', 'Show usage information'
-            m required: true, longOpt: 'email', args: 1, 'The email address(es) results will be sent to'
-            t required: true, longOpt: 'testsToRun', args: 1, 'The commands to pass to the test suite'
-            v required: true, longOpt: 'version', args: 1, 'The version for the jira cycle that gets created'
+            e longOpt: 'email', args: Option.UNLIMITED_VALUES, valueSeparator: ';',
+                'The email address(es) results will be sent to'
         }
 
         if (args?.grep(['-h', '--help'])) {
@@ -23,22 +31,26 @@ class RunPublishNotify {
             return
         }
 
-        runPublishNotify(options.a, options.e, options.m, options.t, options.v)
+        String assembly = options.arguments()[0]
+        String environment = options.arguments()[1]
+        String testsToRun = options.arguments()[2..-1]
+
+        new RunPublishNotify().runPublishNotify(assembly, environment, options.emails ?: [], testsToRun)
     }
 
-    static void runPublishNotify(String assembly, String environment, String email, String testsToRun, String version) {
+    void runPublishNotify(String assembly, String environment, List<String> email, String testsToRun) {
         def guid = RunTests.run(assembly, testsToRun, environment)
-        PrePublish.prePublish(assembly, guid)
-        def jira = PublishToJira.publish(version, assembly, guid)
+        new PrePublish().publish(assembly, guid)
+        def jira = new PublishToJira().publish(assembly, guid)
         EmailCycleResults.email(
             jira.versionId as String,
             jira.cycleId as String,
             email,
-            "$version Test Results for $environment",
-            "$Config.autoUrl/webtesting/results/$assembly/$guid",
+            "$assembly Test Results for $environment",
+            "$config.autoUrl/webtesting/results/$assembly/$guid",
             "Test ran: $testsToRun")
 
-        PublishToCouch.publish(assembly, guid)
-        PublishToInfinity.publish(assembly, guid)
+        new PublishToCouch().publish(assembly, guid)
+        new PublishToInfinity().publish(assembly, guid)
     }
 }

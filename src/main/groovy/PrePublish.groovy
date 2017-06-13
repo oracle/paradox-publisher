@@ -7,34 +7,17 @@ import org.apache.commons.math3.stat.inference.TestUtils
  * Updates existing results in couchdb with augmented data such as known bug and performance information
  */
 @Log4j
-class PrePublish {
-    static auto = new RESTClient(Config.autoUrl, 'application/json')
-    static couch = new RESTClient(Config.couchUrl, 'application/json')
-    static jira = new RESTClient(Config.jiraUrl, 'application/json')
+class PrePublish implements Publisher {
+    def auto = new RESTClient(config.autoUrl, 'application/json')
+    def couch = new RESTClient(config.couchUrl, 'application/json')
+    def jira = new RESTClient(config.jiraUrl, 'application/json')
 
     static void main(String[] args) {
-        def cli = new CliBuilder(usage: 'prePublish')
-        cli.with {
-            a required: true, longOpt: 'assembly', args: 1, 'The name of the test suite run or publish'
-            g required: true, longOpt: 'guid', args: 1, 'The guid of the test suite to publish'
-            h longOpt: 'help', 'Show usage information'
-        }
-
-        if (args?.grep(['-h', '--help'])) {
-            cli.usage()
-            return
-        }
-
-        def options = cli.parse(args)
-        if (!options) {
-            return
-        }
-
-        log.info prePublish(options.a, options.g)
+        new PrePublish().parseCommandline(args)
     }
 
-    static String prePublish(String assembly, String guid) {
-        def basicAuth = 'Basic ' + "$Config.jiraUsername:$Config.jiraPassword".bytes.encodeBase64()
+    def publish(String assembly, String guid) {
+        def basicAuth = 'Basic ' + "$config.jiraUsername:$config.jiraPassword".bytes.encodeBase64()
         jira.headers += [Authorization: basicAuth]
         log.info "Fetching results from ${auto.uri}results/$assembly/$guid ..."
         def results = auto.get(path: "results/$assembly/$guid").data

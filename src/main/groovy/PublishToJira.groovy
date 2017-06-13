@@ -1,46 +1,28 @@
 import groovy.util.logging.Log4j
 import groovyx.net.http.*
-import groovy.json.*
 
 /**
  * Publishes results to jira via zapi into a new jira test cycle
  */
 @Log4j
-class PublishToJira {
-    static auto = new RESTClient(Config.autoUrl, 'application/json')
-    static jira = new RESTClient(Config.jiraUrl, 'application/json')
-    static zapi = new RESTClient(Config.zapiUrl, 'application/json')
-    static cache = [:]
+class PublishToJira implements Publisher {
+    def auto = new RESTClient(config.autoUrl, 'application/json')
+    def jira = new RESTClient(config.jiraUrl, 'application/json')
+    def zapi = new RESTClient(config.zapiUrl, 'application/json')
+    def cache = [:]
+
     static void main(String[] args) {
-        def cli = new CliBuilder(usage: 'publishToJira')
-        cli.with {
-            a required: true, longOpt: 'assembly', args: 1, 'The name of the test suite to publish'
-            g required: true, longOpt: 'guid', args: 1, 'The guid of the test suite to publish'
-            h longOpt: 'help', 'Show usage information'
-            v required: true, longOpt: 'version', args: 1, 'The version for the jira cycle that will be created'
-        }
-
-        if (args?.grep(['-h', '--help'])) {
-            cli.usage()
-            return
-        }
-
-        def options = cli.parse(args)
-        if (!options) {
-            return
-        }
-
-        log.info JsonOutput.toJson(publish(options.a, options.g, options.v))
+        new PublishToJira().parseCommandline(args)
     }
 
-    static publish(String assembly, String guid, String version) {
-        def basicAuth = 'Basic ' + "$Config.jiraUsername:$Config.jiraPassword".bytes.encodeBase64()
+    def publish(String assembly, String guid) {
+        def basicAuth = 'Basic ' + "$config.jiraUsername:$config.jiraPassword".bytes.encodeBase64()
         jira.headers += [Authorization: basicAuth]
         zapi.headers += [Authorization: basicAuth]
-        def projectKey = Config.jiraProjectKey
-        def projectId = Config.jiraProjectId
+        def projectKey = config.jiraProjectKey
+        def projectId = config.jiraProjectId
         def results = getResults(assembly, guid)
-        def versionId = getVersionId(projectKey, version)
+        def versionId = getVersionId(projectKey, assembly)
         def doc = getDocumentation(assembly)
         def cycleId = createCycle(results, projectId)
 
@@ -53,7 +35,7 @@ class PublishToJira {
         [cycleId: cycleId, projectId: projectId, versionId: versionId]
     }
 
-    private static addTestToCycle(test, doc, cycleId, versionId) {
+    private addTestToCycle(test, doc, cycleId, versionId) {
         String nameNoArgs = test.name.takeWhile { it != '(' }
         test.comment = test.comment?.take(766) //Max size for jira execution comment
         test.labels = test.labels ?: doc[nameNoArgs]?.categories ?: []
@@ -67,7 +49,7 @@ class PublishToJira {
         test.priority = 'smoke' in test.labels*.toLowerCase() ? '2' : '3'
         def body = [
             fields: [
-                project: [key: Config.jiraProjectKey],
+                project: [key: config.jiraProjectKey],
                 summary: test.name,
                 issuetype: [name: 'Test'],
                 description: test.summary,
@@ -92,7 +74,7 @@ class PublishToJira {
                 issueId: issue.id,
                 versionId: versionId,
                 cycleId: cycleId,
-                projectId: Config.jiraProjectId,
+                projectId: config.jiraProjectId,
                 executionStatus: status
             ]
         ).data*.key[0]
@@ -104,7 +86,7 @@ class PublishToJira {
         )
     }
 
-    private static getIssue(test, name) {
+    private getIssue(test, name) {
         if (test.id) {
             log.info "Issue has JiraID(${test.id}) associated with it already"
             return jira.get(path: "issue/${test.id}").data
@@ -126,7 +108,7 @@ class PublishToJira {
         cache[test.name]
     }
 
-    private static createIssue(test, body) {
+    private createIssue(test, body) {
         log.info 'Creating new jira issue'
         log.info "Priority = $test.priority"
         def issue = jira.post(path: 'issue', body: body).data
@@ -135,7 +117,7 @@ class PublishToJira {
         issue
     }
 
-    private static updateIssue(issue, test, body) {
+    private updateIssue(issue, test, body) {
         if (hasChanged(issue, test)) {
             jira.put(path: "issue/${issue.key}", body: body)
         }
@@ -178,7 +160,7 @@ class PublishToJira {
         changed
     }
 
-    private static String createCycle(results, String projectId) {
+    private String createCycle(results, String projectId) {
         log.info 'Creating a new execution cycle'
         def date = Date.parse('yyyy-MM-dd', results.date).format('d/MMM/yy')
         def cycleId = zapi.post(
@@ -194,7 +176,7 @@ class PublishToJira {
         cycleId
     }
 
-    private static getDocumentation(String assembly) {
+    private getDocumentation(String assembly) {
         log.info "Fetching documentation from ${auto.uri}doc/$assembly ..."
         def doc = [:]
         try {
@@ -206,7 +188,7 @@ class PublishToJira {
         doc
     }
 
-    private static String getVersionId(String projectKey, String version) {
+    private String getVersionId(String projectKey, String version) {
         log.info 'Fetching versionId'
         def versionId = jira.get(path: "project/$projectKey/versions").data
             .findAll { it.name.contains(version) }
@@ -216,7 +198,7 @@ class PublishToJira {
         versionId
     }
 
-    private static getResults(String assembly, String guid) {
+    private getResults(String assembly, String guid) {
         log.info "Fetching results from ${auto.uri}results/$assembly/$guid ..."
         def results = auto.get(path: "results/$assembly/$guid").data
         log.info "Results = $results"

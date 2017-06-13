@@ -6,18 +6,26 @@ import groovyx.net.http.RESTClient
  */
 @Log4j
 class EmailCycleResults {
-    static zapi = new RESTClient(Config.zapiUrl, 'application/json')
+    def config = new Config()
+    def zapi = new RESTClient(config.zapiUrl, 'application/json')
 
     static void main(String[] args) {
-        def cli = new CliBuilder(usage: 'emailCycleResults')
+        def cli = new CliBuilder(
+            usage: '''
+                | emailCycleResults [OPTION]... <cycleId> <version> <email>...
+                |
+                |arguments:
+                | <cycleId>   The id of the cycle to export
+                | <version>   The version of the cycle to export
+                | <email>...  The email address(es) results will be sent to
+                |
+                |options:'''.stripMargin()
+        )
         cli.with {
-            c required: true, longOpt: 'cycleId', args: 1, 'The id of the cycle to export'
-            f required: true, longOpt: 'footer', args: 1 'The footer/bottom line of the email'
+            f longOpt: 'footer', args: 1, 'The footer/bottom line of the email  [default: ""]'
             h longOpt: 'help', 'Show usage information'
-            m required: true, longOpt: 'email', args: 1 'The email address(es) results will be sent to'
-            s required: true, longOpt: 'subject', args: 1 'The subject line of the email'
-            t required: true, longOpt: 'header', args: 1 'The header/top line of the email'
-            v required: true, longOpt: 'version', args: 1, 'The version of the cycle to export'
+            s longOpt: 'subject', args: 1, 'The subject line of the email [default: "Test Results"]'
+            t longOpt: 'header', args: 1, 'The header/top line of the email [default: Url of cycle]'
         }
 
         if (args?.grep(['-h', '--help'])) {
@@ -30,17 +38,26 @@ class EmailCycleResults {
             return
         }
 
-        email(options.v, options.c, options.m, options.s, options.t, options.f)
+        String cycleId = options.arguments()[0]
+        String version = options.arguments()[1]
+        List<String> addresses = options.arguments()[2..-1]
+        new EmailCycleResults().email(
+            version,
+            cycleId,
+            addresses,
+            options.s as String,
+            options.t as String,
+            options.f as String)
     }
 
-    static void email(String versionId, String cycleId, String email, String subject, String header, String footer) {
-        def basicAuth = 'Basic ' + "$Config.jiraUsername:$Config.jiraPassword".bytes.encodeBase64()
+    void email(String versionId, String cycleId, List<String> email, String subject, String header, String footer) {
+        def basicAuth = 'Basic ' + "$config.jiraUsername:$Config.jiraPassword".bytes.encodeBase64()
         zapi.headers += [Authorization: basicAuth]
 
-        log.info "Fetching cycle ($cycleId) from jira for project ($Config.jiraProjectId) and version ($versionId)"
+        log.info "Fetching cycle ($cycleId) from jira for project ($config.jiraProjectId) and version ($versionId)"
         def exportUrl = zapi.get(
             path: '/cycle/$cycleId/export',
-            query: [projectId: Config.jiraProjectId, versionId: versionId]).url
+            query: [projectId: config.jiraProjectId, versionId: versionId]).url
         log.debug exportUrl
         def dataRaw = zapi.get(uri: exportUrl)
 
@@ -113,15 +130,15 @@ debug "$content"
 
         String html = ''
 
-        def emailContent = """From:$Config.jiraUsername
+        def emailContent = """From:$config.jiraUsername
 To: $email
-Subject: $subject
+Subject: ${subject ?: 'Test Results'}
 Content-Type: text/html
 MIME-Version: 1.0
 
-$header
+${header ?: "$zapi.uri/cycle/$cycleId/export"}
 $html
-$footer"""
+${footer ?: ''}"""
 
         assert false, "TODO: email contents of $emailContent"
     }
