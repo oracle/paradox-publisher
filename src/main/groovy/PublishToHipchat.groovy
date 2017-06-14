@@ -6,14 +6,22 @@ import groovyx.net.http.RESTClient
  */
 @Log4j
 class PublishToHipchat implements Publisher {
-    def auto = new RESTClient(config.autoUrl, 'application/json')
-    def hipchat = new RESTClient(config.hipchatUrl, 'application/json')
+    @Lazy
+    def auto = { new RESTClient(config.autoUrl, 'application/json') } ()
+
+    @Lazy
+    def hipchat = { new RESTClient(config.hipchatUrl, 'application/json') } ()
 
     static void main(String[] args) {
         new PublishToHipchat().parseCommandline(args)
     }
 
     def publish(String assembly, String guid) {
+        if (!config.with { autoUrl && hipchatToken && hipchatUrl && hipchatRoomid }) {
+            log.warn "Missing config values: unable to execute ${this.getClass().name}"
+            return null
+        }
+
         hipchat.headers += [Authorization: "Bearer $config.hipchatToken"]
         def results = auto.get(path: "results/$assembly/$guid").data
         hipchat.post(

@@ -7,7 +7,9 @@ import groovyx.net.http.RESTClient
 @Log4j
 class EmailCycleResults {
     def config = new Config()
-    def zapi = new RESTClient(config.zapiUrl, 'application/json')
+
+    @Lazy
+    def zapi = { new RESTClient(config.zapiUrl, 'application/json') } ()
 
     static void main(String[] args) {
         def cli = new CliBuilder(
@@ -19,7 +21,8 @@ class EmailCycleResults {
                 | <version>   The version of the cycle to export
                 | <email>...  The email address(es) results will be sent to
                 |
-                |options:'''.stripMargin()
+                |options:'''.stripMargin(),
+            stopAtNonOption: false
         )
         cli.with {
             f longOpt: 'footer', args: 1, 'The footer/bottom line of the email  [default: ""]'
@@ -38,6 +41,12 @@ class EmailCycleResults {
             return
         }
 
+        if (options.arguments().size() < 3) {
+            cli.writer << 'error: Too few arguments\n'
+            cli.usage()
+            return
+        }
+
         String cycleId = options.arguments()[0]
         String version = options.arguments()[1]
         List<String> addresses = options.arguments()[2..-1]
@@ -51,7 +60,12 @@ class EmailCycleResults {
     }
 
     void email(String versionId, String cycleId, List<String> email, String subject, String header, String footer) {
-        def basicAuth = 'Basic ' + "$config.jiraUsername:$Config.jiraPassword".bytes.encodeBase64()
+        if (!config.with { autoUrl && zapiUrl && jiraProjectId && jiraUsername && jiraPassword }) {
+            log.warn "Missing config values: unable to execute ${this.getClass().name}"
+            return null
+        }
+
+        def basicAuth = 'Basic ' + "$config.jiraUsername:$config.jiraPassword".bytes.encodeBase64()
         zapi.headers += [Authorization: basicAuth]
 
         log.info "Fetching cycle ($cycleId) from jira for project ($config.jiraProjectId) and version ($versionId)"

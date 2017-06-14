@@ -7,18 +7,21 @@ import groovyx.net.http.RESTClient
 @Log4j
 class RunTests {
     def config = new Config()
-    def rest = new RESTClient(config.autoUrl, 'application/json')
+
+    @Lazy
+    def auto = { new RESTClient(config.autoUrl, 'application/json') } ()
 
     static void main(String[] args) {
         def cli = new CliBuilder(
-            usage: '''runTests [-h] <assembly> <guid> -- <testsToRun>
+            usage: '''runTests [-h] <assembly> <environment> -- <testsToRun>
                 |
                 |arguments:
                 | <assembly>     The name of the test suite to run
                 | <environment>  The environment to run the tests against
                 | <testsToRun>   The commandline parameters to pass to the test suite
                 |
-                |options:'''.stripMargin()
+                |options:'''.stripMargin(),
+            stopAtNonOption: false
         )
         cli.with {
             h longOpt: 'help', 'Show usage information'
@@ -34,9 +37,15 @@ class RunTests {
             return
         }
 
+        if (options.arguments().size() < 3) {
+            cli.writer << 'error: Too few arguments\n'
+            cli.usage()
+            return
+        }
+
         String assembly = options.arguments()[0]
         String environment = options.arguments()[1]
-        String testsToRun = options.arguments()[2..-1]
+        List<String> testsToRun = options.arguments()[2..-1]
         log.info new RunTests().run(assembly, testsToRun, environment)
     }
 
@@ -45,14 +54,19 @@ class RunTests {
         reader.ready() ? reader.readLine() : ''
     }
 
-    String run(String assembly, testsToRun, String environment) {
+    String run(String assembly, List<String> testsToRun, String environment) {
+        if (!config.with { autoUrl }) {
+            log.warn "Missing config values: unable to execute ${this.getClass().name}"
+            return null
+        }
+
         log.info "Running Tests '$assembly' '$testsToRun' '$environment'"
-        URL url = postToQueue(testsToRun, environment, assembly)
+        URL url = postToQueue(assembly, testsToRun, assembly)
         pollForFinished(url)
     }
 
-    URL postToQueue(String assembly, String testsToRun, String environment) {
-        def resp = rest.post(
+    URL postToQueue(String assembly, List<String> testsToRun, String environment) {
+        def resp = auto.post(
             path: "queue/$assembly",
             body: [
                 testsToRun: testsToRun,
@@ -64,11 +78,11 @@ class RunTests {
     }
 
     String pollForFinished(URL url) {
-        def item = (rest.get(path: url.path)).data
+        def item = (auto.get(path: url.path)).data
         while (item.Status == 'Running') {
             log.info 'sleeping 60 seconds'
             sleep(60000)
-            item = (rest.get(path: url.path)).data
+            item = (auto.get(path: url.path)).data
             log.info "item = $item"
         }
 

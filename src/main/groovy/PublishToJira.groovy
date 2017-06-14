@@ -6,16 +6,26 @@ import groovyx.net.http.*
  */
 @Log4j
 class PublishToJira implements Publisher {
-    def auto = new RESTClient(config.autoUrl, 'application/json')
-    def jira = new RESTClient(config.jiraUrl, 'application/json')
-    def zapi = new RESTClient(config.zapiUrl, 'application/json')
+    @Lazy
+    def auto = { new RESTClient(config.autoUrl, 'application/json') } ()
+
+    @Lazy
+    def jira = { new RESTClient(config.jiraUrl, 'application/json') } ()
+
+    @Lazy
+    def zapi = { new RESTClient(config.zapiUrl, 'application/json') } ()
     def cache = [:]
 
     static void main(String[] args) {
-        new PublishToJira().parseCommandline(args)
+        log.info new PublishToJira().parseCommandline(args)
     }
 
     def publish(String assembly, String guid) {
+        if (!config.with { autoUrl && jiraUrl && jiraProjectKey && jiraProjectId && jiraUsername && jiraPassword }) {
+            log.warn "Missing config values: unable to execute ${this.getClass().name}"
+            return null
+        }
+
         def basicAuth = 'Basic ' + "$config.jiraUsername:$config.jiraPassword".bytes.encodeBase64()
         jira.headers += [Authorization: basicAuth]
         zapi.headers += [Authorization: basicAuth]

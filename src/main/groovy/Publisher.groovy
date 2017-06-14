@@ -1,8 +1,11 @@
+import groovy.util.logging.Log4j
+
 /**
  * Encapsulates the standard publisher pattern that accepts an assembly name and a guid.
  */
+@Log4j
 trait Publisher {
-    def config = new Config()
+    Config config = new Config()
 
     def parseCommandline(String[] args) {
         def cli = new CliBuilder(
@@ -12,7 +15,8 @@ trait Publisher {
                 | <assembly>  The name of the test suite to publish
                 | <guid>      The guid of the test suite to publish
                 |
-                |options:""".stripMargin()
+                |options:""".stripMargin(),
+            stopAtNonOption: false
         )
         cli.with {
             h longOpt: 'help', 'Show usage information'
@@ -25,6 +29,12 @@ trait Publisher {
 
         def options = cli.parse(args)
         if (!options) {
+            return
+        }
+
+        if (options.arguments().size() != 2) {
+            cli.writer << 'error: Wrong number of arguments\n'
+            cli.usage()
             return
         }
 

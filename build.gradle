@@ -34,6 +34,7 @@ mainClassName = 'NoClassName'
         applicationName = name
         outputDir = new File('src/dist/bin')
         classpath = startScripts.classpath
+        defaultJvmOpts = ['-Dlog4j.configuration=file:conf/log4j.xml']
         startScripts.dependsOn "${name}StartScripts"
 
         // The classpath generated in the .bat script lists all the jars.

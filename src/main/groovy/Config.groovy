@@ -17,6 +17,7 @@ class Config {
         jiraProjectId = config.jiraProjectId
         hipchatToken = config.hipchatToken
         hipchatUrl = config.hipchatUrl
+        hipchatRoomid = config.hipchatRoomid
     }
 
     String autoUrl
@@ -30,4 +31,5 @@ class Config {
     String jiraProjectId
     String hipchatToken
     String hipchatUrl
+    String hipchatRoomid
 }

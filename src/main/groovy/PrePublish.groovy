@@ -8,15 +8,25 @@ import org.apache.commons.math3.stat.inference.TestUtils
  */
 @Log4j
 class PrePublish implements Publisher {
-    def auto = new RESTClient(config.autoUrl, 'application/json')
-    def couch = new RESTClient(config.couchUrl, 'application/json')
-    def jira = new RESTClient(config.jiraUrl, 'application/json')
+    @Lazy
+    def auto = { new RESTClient(config.autoUrl, 'application/json') } ()
+
+    @Lazy
+    def couch = { new RESTClient(config.couchUrl, 'application/json') } ()
+
+    @Lazy
+    def jira = { new RESTClient(config.jiraUrl, 'application/json') } ()
 
     static void main(String[] args) {
         new PrePublish().parseCommandline(args)
     }
 
     def publish(String assembly, String guid) {
+        if (!config.with { autoUrl && couchUrl && jiraUrl && jiraUsername && jiraPassword }) {
+            log.warn "Missing config values: unable to execute ${this.getClass().name}"
+            return null
+        }
+
         def basicAuth = 'Basic ' + "$config.jiraUsername:$config.jiraPassword".bytes.encodeBase64()
         jira.headers += [Authorization: basicAuth]
         log.info "Fetching results from ${auto.uri}results/$assembly/$guid ..."
