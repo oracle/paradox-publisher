@@ -45,7 +45,7 @@ class RunTests {
 
         String assembly = options.arguments()[0]
         String environment = options.arguments()[1]
-        List<String> testsToRun = options.arguments()[2..-1]
+        String testsToRun = options.arguments()[2..-1].join(' ')
         log.info new RunTests().run(assembly, testsToRun, environment)
     }
 
@@ -54,7 +54,7 @@ class RunTests {
         reader.ready() ? reader.readLine() : ''
     }
 
-    String run(String assembly, List<String> testsToRun, String environment) {
+    String run(String assembly, String testsToRun, String environment) {
         if (!config.with { autoUrl }) {
             log.warn "Missing config values: unable to execute ${this.getClass().name}"
             return null
@@ -65,7 +65,7 @@ class RunTests {
         pollForFinished(url)
     }
 
-    URL postToQueue(String assembly, List<String> testsToRun, String environment) {
+    URL postToQueue(String assembly, String testsToRun, String environment) {
         def resp = auto.post(
             path: "queue/$assembly",
             body: [

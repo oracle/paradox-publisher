@@ -42,12 +42,12 @@ class RunPublishNotify {
 
         String assembly = options.arguments()[0]
         String environment = options.arguments()[1]
-        List<String> testsToRun = options.arguments()[2..-1]
+        String testsToRun = options.arguments()[2..-1].join(' ')
 
         new RunPublishNotify().runPublishNotify(assembly, environment, options.emails ?: [], testsToRun)
     }
 
-    void runPublishNotify(String assembly, String environment, List<String> email, List<String> testsToRun) {
+    void runPublishNotify(String assembly, String environment, List<String> email, String testsToRun) {
         def guid = new RunTests().run(assembly, testsToRun, environment)
         new PrePublish().publish(assembly, guid)
         def jira = new PublishToJira().publish(assembly, guid)
