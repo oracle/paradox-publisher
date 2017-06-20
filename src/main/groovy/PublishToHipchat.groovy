@@ -6,11 +6,9 @@ import groovyx.net.http.RESTClient
  */
 @Log4j
 class PublishToHipchat implements Publisher {
-    @Lazy
-    def auto = { new RESTClient(config.autoUrl, 'application/json') } ()
+    RESTClient auto
 
-    @Lazy
-    def hipchat = { new RESTClient(config.hipchatUrl, 'application/json') } ()
+    RESTClient hipchat
 
     static void main(String[] args) {
         new PublishToHipchat().parseCommandline(args)
@@ -22,6 +20,8 @@ class PublishToHipchat implements Publisher {
             return null
         }
 
+        auto = new RESTClient(config.autoUrl, 'application/json')
+        hipchat = new RESTClient(config.hipchatUrl, 'application/json')
         hipchat.headers += [Authorization: "Bearer $config.hipchatToken"]
         def results = auto.get(path: "results/$assembly/$guid").data
         hipchat.post(

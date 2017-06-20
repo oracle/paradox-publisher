@@ -7,8 +7,8 @@ import groovy.util.logging.Log4j
 @Log4j
 class PublishToInfinity implements Publisher {
     static final PUBLISHER_VERSION = '0.1'
-    def auto = new RESTClient(config.autoUrl, 'application/json')
-    def scs = new RESTClient().with { parser.'image/gif' = parser.defaultParser; it }
+    RESTClient auto
+    RESTClient scs
 
     static void main(String[] args) {
         new PublishToInfinity().parseCommandline(args)
@@ -27,6 +27,13 @@ class PublishToInfinity implements Publisher {
     }
 
     def publish(String assemblyName, String executionGuid) {
+        if (!config.with { autoUrl && scsUrl }) {
+            log.warn "Missing config values: unable to execute ${this.getClass().name}"
+            return null
+        }
+
+        auto = new RESTClient(config.autoUrl, 'application/json')
+        scs = new RESTClient(config.scsUrl).with { parser.'image/gif' = parser.defaultParser; it }
         log.info "Fetching results from ${auto.uri}results/$assemblyName/$executionGuid ..."
         def results = auto.get(path: "results/$assemblyName/$executionGuid").data
         log.info "Results = $results"

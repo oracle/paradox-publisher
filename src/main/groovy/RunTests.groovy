@@ -8,8 +8,7 @@ import groovyx.net.http.RESTClient
 class RunTests {
     def config = new Config()
 
-    @Lazy
-    def auto = { new RESTClient(config.autoUrl, 'application/json') } ()
+    RESTClient auto
 
     static void main(String[] args) {
         def cli = new CliBuilder(
@@ -60,6 +59,7 @@ class RunTests {
             return null
         }
 
+        auto = new RESTClient(config.autoUrl, 'application/json')
         log.info "Running Tests '$assembly' '$testsToRun' '$environment'"
         URL url = postToQueue(assembly, testsToRun, environment)
         pollForFinished(url)

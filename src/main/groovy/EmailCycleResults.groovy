@@ -8,8 +8,7 @@ import groovyx.net.http.RESTClient
 class EmailCycleResults {
     def config = new Config()
 
-    @Lazy
-    def zapi = { new RESTClient(config.zapiUrl, 'application/json') } ()
+    RESTClient zapi
 
     static void main(String[] args) {
         def cli = new CliBuilder(
@@ -60,11 +59,12 @@ class EmailCycleResults {
     }
 
     void email(String versionId, String cycleId, List<String> email, String subject, String header, String footer) {
-        if (!config.with { autoUrl && zapiUrl && jiraProjectId && jiraUsername && jiraPassword }) {
+        if (!config.with { zapiUrl && jiraProjectId && jiraUsername && jiraPassword }) {
             log.warn "Missing config values: unable to execute ${this.getClass().name}"
             return null
         }
 
+        zapi = new RESTClient(config.zapiUrl, 'application/json')
         def basicAuth = 'Basic ' + "$config.jiraUsername:$config.jiraPassword".bytes.encodeBase64()
         zapi.headers += [Authorization: basicAuth]
 

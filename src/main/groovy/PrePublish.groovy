@@ -8,14 +8,11 @@ import org.apache.commons.math3.stat.inference.TestUtils
  */
 @Log4j
 class PrePublish implements Publisher {
-    @Lazy
-    def auto = { new RESTClient(config.autoUrl, 'application/json') } ()
+    RESTClient auto
 
-    @Lazy
-    def couch = { new RESTClient(config.couchUrl, 'application/json') } ()
+    RESTClient couch
 
-    @Lazy
-    def jira = { new RESTClient(config.jiraUrl, 'application/json') } ()
+    RESTClient jira
 
     static void main(String[] args) {
         new PrePublish().parseCommandline(args)
@@ -27,6 +24,9 @@ class PrePublish implements Publisher {
             return null
         }
 
+        auto = new RESTClient(config.autoUrl, 'application/json')
+        couch = new RESTClient(config.couchUrl, 'application/json')
+        jira = new RESTClient(config.jiraUrl, 'application/json')
         def basicAuth = 'Basic ' + "$config.jiraUsername:$config.jiraPassword".bytes.encodeBase64()
         jira.headers += [Authorization: basicAuth]
         log.info "Fetching results from ${auto.uri}results/$assembly/$guid ..."

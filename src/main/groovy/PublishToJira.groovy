@@ -6,14 +6,11 @@ import groovyx.net.http.*
  */
 @Log4j
 class PublishToJira implements Publisher {
-    @Lazy
-    def auto = { new RESTClient(config.autoUrl, 'application/json') } ()
+    RESTClient auto
 
-    @Lazy
-    def jira = { new RESTClient(config.jiraUrl, 'application/json') } ()
+    RESTClient jira
 
-    @Lazy
-    def zapi = { new RESTClient(config.zapiUrl, 'application/json') } ()
+    RESTClient zapi
     def cache = [:]
 
     static void main(String[] args) {
@@ -25,7 +22,9 @@ class PublishToJira implements Publisher {
             log.warn "Missing config values: unable to execute ${this.getClass().name}"
             return null
         }
-
+        auto = new RESTClient(config.autoUrl, 'application/json')
+        jira = new RESTClient(config.jiraUrl, 'application/json')
+        zapi = new RESTClient(config.zapiUrl, 'application/json')
         def basicAuth = 'Basic ' + "$config.jiraUsername:$config.jiraPassword".bytes.encodeBase64()
         jira.headers += [Authorization: basicAuth]
         zapi.headers += [Authorization: basicAuth]

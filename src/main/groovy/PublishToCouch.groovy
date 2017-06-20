@@ -6,11 +6,9 @@ import groovyx.net.http.RESTClient
  */
 @Log4j
 class PublishToCouch implements Publisher {
-    @Lazy
-    def auto = { new RESTClient(config.autoUrl, 'application/json') } ()
+    RESTClient auto
 
-    @Lazy
-    def couch = { new RESTClient(config.couchUrl, 'application/json') } ()
+    RESTClient couch
 
     static void main(String[] args) {
         new PublishToCouch().parseCommandline(args)
@@ -22,6 +20,8 @@ class PublishToCouch implements Publisher {
             return null
         }
 
+        auto = new RESTClient(config.autoUrl, 'application/json')
+        couch = new RESTClient(config.couchUrl, 'application/json')
         def results = auto.get(path: "results/$assembly/$guid").data
         couch.put(path: "automation/$guid", body: results)
     }
