@@ -31,8 +31,15 @@ class PrePublish implements Publisher {
         jira.headers += [Authorization: basicAuth]
         log.info "Fetching results from ${auto.uri}results/$assembly/$guid ..."
         def results = auto.get(path: "results/$assembly/$guid").data
-        TestResult[] tests = results.tests
 
+        addJiraStatus(results)
+        addPerformanceComment(results)
+
+        auto.put(path: "results/$assembly/$guid", body: results)
+    }
+
+    private addJiraStatus(results) {
+        TestResult[] tests = results.tests
         // We do not want a failure to contact jira to prevent results from showing in couch
         try {
             log.info 'augmenting with jira info'
@@ -50,8 +57,10 @@ class PrePublish implements Publisher {
         } catch (Exception ex) {
             log.warn 'Unable to augment results with jira status', ex
         }
+    }
 
-        tests.findAll { it.performance }.each { test ->
+    private addPerformanceComment(results) {
+        results.tests.findAll { it.performance }.each { test ->
             def perfResult = couch.get(
                 path: 'automation/_design/testResults/_view/performance',
                 query: [startkey: /["${test.name}","",""]/, endkey: /["${test.name}_","",""]/]
@@ -72,15 +81,5 @@ class PrePublish implements Publisher {
                 }
             }
         }
-
-        auto.put(path: "results/$assembly/$guid", body: results)
     }
-}
-
-class TestResult {
-    String name
-    String state
-    String defect
-    String comment
-    StatisticalSummary performance
 }
