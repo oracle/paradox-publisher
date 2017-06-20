@@ -61,7 +61,7 @@ class RunTests {
         }
 
         log.info "Running Tests '$assembly' '$testsToRun' '$environment'"
-        URL url = postToQueue(assembly, testsToRun, assembly)
+        URL url = postToQueue(assembly, testsToRun, environment)
         pollForFinished(url)
     }
 
