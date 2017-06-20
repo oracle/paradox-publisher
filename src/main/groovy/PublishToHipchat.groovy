@@ -15,7 +15,7 @@ class PublishToHipchat implements Publisher {
     }
 
     def publish(String assembly, String guid) {
-        if (!config.with { autoUrl && hipchatToken && hipchatUrl && hipchatRoomid }) {
+        if (!config.with { autoUrl && hipchatToken && hipchatUrl && hipchatRoomId }) {
             log.warn "Missing config values: unable to execute ${this.getClass().name}"
             return null
         }
@@ -25,7 +25,7 @@ class PublishToHipchat implements Publisher {
         hipchat.headers += [Authorization: "Bearer $config.hipchatToken"]
         def results = auto.get(path: "results/$assembly/$guid").data
         hipchat.post(
-            path: "room/$config.hipchatRoomid/notification",
+            path: "room/$config.hipchatRoomId/notification",
             body: [
                 style: 'application',
                 url: "$auto.uri/results/$assembly/$guid",
