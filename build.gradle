@@ -3,6 +3,7 @@ plugins {
     id 'idea'
     id 'application'
     id 'codenarc'
+    id 'maven-publish'
 }
 
 repositories {
