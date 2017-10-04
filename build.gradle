@@ -18,7 +18,7 @@ dependencies {
 }
 
 codenarc {
-    toolVersion = '0.27.0'
+    toolVersion = '1.0'
     configFile = new File('conf/codenarc.groovy')
     maxPriority1Violations = 0
     maxPriority2Violations = 0
