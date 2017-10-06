@@ -1,3 +1,5 @@
+package com.oracle.infy.qa.paradoxpublisher
+
 import groovyx.net.http.*
 import groovy.util.logging.Log4j
 

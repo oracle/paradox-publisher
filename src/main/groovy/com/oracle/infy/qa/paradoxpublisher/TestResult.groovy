@@ -1,3 +1,5 @@
+package com.oracle.infy.qa.paradoxpublisher
+
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary
 
 /**
