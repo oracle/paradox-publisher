@@ -1,3 +1,5 @@
+package com.oracle.infy.qa.paradoxpublisher
+
 import groovy.util.logging.Log4j
 import groovyx.net.http.RESTClient
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary

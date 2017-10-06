@@ -39,31 +39,8 @@ mainClassName = 'NoClassName'
     }
 }
 
-version = Boolean.parseBoolean(System.properties['release']) ? '1.0.0' : '2.0.0-SNAPSHOT'
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            artifactId 'paradox-publisher'
-        }
-    }
-    repositories { maven { url "$buildDir/repo"} }
-}
-
-if (project.hasProperty('artifactoryPublish')) {
-    artifactory {
-        publish {
-            repository {
-                maven = true
-            }
-            defaults {
-                publications('mavenJava')
-                publishPom = true
-            }
-        }
-    }
-}
+group = 'com.oracle.infy.qa.paradoxpublisher'
+version = '1.0.1'
 
 codenarc {
     toolVersion = '1.0'
@@ -72,4 +49,20 @@ codenarc {
     maxPriority2Violations = 0
     maxPriority3Violations = 0
     reportFormat = project.properties.'codenarc.reportFormat' ?: 'html'
+}
+
+distributions {
+    main {
+        contents {
+            from("$rootDir/src/dist/") {
+                include 'bin/*'
+                fileMode 0755
+            }
+        }
+    }
+}
+
+distTar {
+    compression = Compression.GZIP
+    extension = 'tar.gz'
 }

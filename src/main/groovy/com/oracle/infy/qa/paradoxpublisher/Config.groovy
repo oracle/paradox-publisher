@@ -1,3 +1,5 @@
+package com.oracle.infy.qa.paradoxpublisher
+
 /**
  * Parses the config file into a typesafe object
  */
