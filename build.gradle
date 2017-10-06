@@ -42,15 +42,6 @@ mainClassName = 'NoClassName'
 group = 'com.oracle.infy.qa.paradoxpublisher'
 version = '1.0.1'
 
-codenarc {
-    toolVersion = '1.0'
-    configFile = new File('conf/codenarc.groovy')
-    maxPriority1Violations = 0
-    maxPriority2Violations = 0
-    maxPriority3Violations = 0
-    reportFormat = project.properties.'codenarc.reportFormat' ?: 'html'
-}
-
 distributions {
     main {
         contents {
@@ -65,4 +56,13 @@ distributions {
 distTar {
     compression = Compression.GZIP
     extension = 'tar.gz'
+}
+
+codenarc {
+    toolVersion = '1.0'
+    configFile = new File('conf/codenarc.groovy')
+    maxPriority1Violations = 0
+    maxPriority2Violations = 0
+    maxPriority3Violations = 0
+    reportFormat = project.properties.'codenarc.reportFormat' ?: 'html'
 }
