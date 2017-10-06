@@ -3,11 +3,10 @@ plugins {
     id 'idea'
     id 'application'
     id 'codenarc'
-    id 'maven-publish'
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
@@ -40,7 +39,7 @@ mainClassName = 'NoClassName'
 }
 
 group = 'com.oracle.infy.qa.paradoxpublisher'
-version = '1.0.1'
+version = '1.0.2'
 
 distributions {
     main {
