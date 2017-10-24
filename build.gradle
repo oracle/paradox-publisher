@@ -21,7 +21,7 @@ mainClassName = 'NoClassName'
 ['runPublishNotify', 'runTests', 'prePublish', 'publishToCouch',
     'publishToInfinity', 'publishToJira', 'publishToHipchat', 'emailCycleResults'].each { name ->
     task "${name}StartScripts"(type: CreateStartScripts) {
-        mainClassName = name.capitalize()
+        mainClassName = 'com.oracle.infy.qa.paradoxpublisher.' + name.capitalize()
         applicationName = name
         outputDir = new File('src/dist/bin')
         classpath = startScripts.classpath
@@ -65,13 +65,3 @@ codenarc {
     maxPriority3Violations = 0
     reportFormat = project.properties.'codenarc.reportFormat' ?: 'html'
 }
-
-codenarc {
-    toolVersion = '1.0'
-    configFile = new File('conf/codenarc.groovy')
-    maxPriority1Violations = 0
-    maxPriority2Violations = 0
-    maxPriority3Violations = 0
-    reportFormat = project.properties.'codenarc.reportFormat' ?: 'html'
-}
-
