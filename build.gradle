@@ -21,7 +21,7 @@ mainClassName = 'NoClassName'
 ['runPublishNotify', 'runTests', 'prePublish', 'publishToCouch',
     'publishToInfinity', 'publishToJira', 'publishToHipchat', 'emailCycleResults'].each { name ->
     task "${name}StartScripts"(type: CreateStartScripts) {
-        mainClassName = name.capitalize()
+        mainClassName = 'com.oracle.infy.qa.paradoxpublisher.' + name.capitalize()
         applicationName = name
         outputDir = new File('src/dist/bin')
         classpath = startScripts.classpath
