@@ -69,7 +69,7 @@ class RunTests {
 
     URL postToQueue(String assembly, String testsToRun, String environment) {
         def resp = auto.post(
-            path: "queue/$assembly",
+            uri: "${auto.uri}/queue/$assembly",
             body: [
                 testsToRun: testsToRun,
                 environment: environment,
@@ -80,11 +80,11 @@ class RunTests {
     }
 
     String pollForFinished(URL url) {
-        def item = (auto.get(path: url.path)).data
+        def item = (auto.get(uri: "${auto.uri}/$url.path")).data
         while (item.Status == 'Running') {
             log.info 'sleeping 60 seconds'
             sleep(60000)
-            item = (auto.get(path: url.path)).data
+            item = (auto.get(uri: "${auto.uri}/url.path")).data
             log.info "item = $item"
         }
 
