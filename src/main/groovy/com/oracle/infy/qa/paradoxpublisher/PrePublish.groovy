@@ -31,13 +31,13 @@ class PrePublish implements Publisher {
         jira = new RESTClient(config.jiraUrl, 'application/json')
         def basicAuth = 'Basic ' + "$config.jiraUsername:$config.jiraPassword".bytes.encodeBase64()
         jira.headers += [Authorization: basicAuth]
-        log.info "Fetching results from ${auto.uri}results/$assembly/$guid ..."
-        def results = auto.get(path: "results/$assembly/$guid").data
+        log.info "Fetching results from ${auto.uri}/results/$assembly/$guid ..."
+        def results = auto.get(uri: "${auto.uri}/results/$assembly/$guid").data
 
         addJiraStatus(results)
         addPerformanceComment(results)
 
-        auto.put(path: "results/$assembly/$guid", body: results)
+        auto.put(uri: "${auto.uri}/results/$assembly/$guid", body: results)
     }
 
     private addJiraStatus(results) {

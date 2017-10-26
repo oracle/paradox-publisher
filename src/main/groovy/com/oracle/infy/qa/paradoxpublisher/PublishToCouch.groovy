@@ -24,7 +24,7 @@ class PublishToCouch implements Publisher {
 
         auto = new RESTClient(config.autoUrl, 'application/json')
         couch = new RESTClient(config.couchUrl, 'application/json')
-        def results = auto.get(path: "results/$assembly/$guid").data
+        def results = auto.get(uri: "${auto.uri}/results/$assembly/$guid").data
         couch.put(path: "automation/$guid", body: results)
     }
 }

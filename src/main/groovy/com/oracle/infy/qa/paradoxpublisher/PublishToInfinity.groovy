@@ -36,8 +36,8 @@ class PublishToInfinity implements Publisher {
 
         auto = new RESTClient(config.autoUrl, 'application/json')
         scs = new RESTClient(config.scsUrl).with { parser.'image/gif' = parser.defaultParser; it }
-        log.info "Fetching results from ${auto.uri}results/$assemblyName/$executionGuid ..."
-        def results = auto.get(path: "results/$assemblyName/$executionGuid").data
+        log.info "Fetching results from ${auto.uri}/results/$assemblyName/$executionGuid ..."
+        def results = auto.get(uri: "${auto.uri}/results/$assemblyName/$executionGuid").data
         log.info "Results = $results"
 
         //Send Test Suite

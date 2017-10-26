@@ -188,10 +188,10 @@ class PublishToJira implements Publisher {
     }
 
     private getDocumentation(String assembly) {
-        log.info "Fetching documentation from ${auto.uri}doc/$assembly ..."
+        log.info "Fetching documentation from ${auto.uri}/doc/$assembly ..."
         def doc = [:]
         try {
-            def docList = auto.get(path: "doc/$assembly").data
+            def docList = auto.get(uri: "${auto.uri}/doc/$assembly").data
             docList.collectEntries(doc) { [(it.name): it] }
         } catch (e) {
             log.error "Unable to get documentation for $assembly", e
@@ -210,8 +210,8 @@ class PublishToJira implements Publisher {
     }
 
     private getResults(String assembly, String guid) {
-        log.info "Fetching results from ${auto.uri}results/$assembly/$guid ..."
-        def results = auto.get(path: "results/$assembly/$guid").data
+        log.info "Fetching results from ${auto.uri}/results/$assembly/$guid ..."
+        def results = auto.get(uri: "${auto.uri}/results/$assembly/$guid").data
         log.info "Results = $results"
         results
     }
