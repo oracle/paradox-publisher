@@ -80,11 +80,11 @@ class RunTests {
     }
 
     String pollForFinished(URL url) {
-        def item = (auto.get(uri: "${auto.uri}/$url.path")).data
+        def item = (auto.get(path: "$url.path")).data
         while (item.Status == 'Running') {
             log.info 'sleeping 60 seconds'
             sleep(60000)
-            item = (auto.get(uri: "${auto.uri}/url.path")).data
+            item = (auto.get(path: "$url.path")).data
             log.info "item = $item"
         }
 
