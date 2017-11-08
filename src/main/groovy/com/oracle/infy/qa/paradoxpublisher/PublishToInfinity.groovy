@@ -25,7 +25,7 @@ class PublishToInfinity implements Publisher {
             .findAll { it.value }
             .collectEntries { [it.key, URLEncoder.encode(it.value as String, 'UTF-8')] }
             .collect { "$it.key=$it.value" }.join('&')
-        scs.get(uri: "$config.scsUrl?$queryString", headers: ['User-Agent': 'paradoxRestClient'])
+        scs.get(uri: "$config.scsUrl?$queryString", headers: ['User-Agent': 'InfinityParadoxPublisher'])
     }
 
     def publish(String assemblyName, String executionGuid) {
