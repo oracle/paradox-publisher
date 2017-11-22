@@ -40,29 +40,23 @@ class PublishToInfinity implements Publisher {
         def results = auto.get(uri: "${auto.uri}/results/$assemblyName/$executionGuid").data
         log.info "Results = $results"
 
-        //Send Test Suite
-        sendEvent(
-            'wt.co_f': executionGuid,
-            dcsuri: assemblyName,
-            suiteName: assemblyName,
-            environment: results.environment,
-            date: results.date,
-            time: results.time,
-            commandLine: results.commandline,
-            dscsip: InetAddress.localHost.hostName,
-            dcsaut: System.properties.'user.name'
-        )
-
         //Send Test Results
         for (test in results.tests) {
             sendEvent(
                 'wt.co_f': executionGuid,
                 dcsuri: test.name.replaceAll('\\.', '/'),
+                suiteName: assemblyName,
+                environment: results.environment,
                 testName: test.name,
                 'wt.cg_n': test.labels.join(';'),
                 state: test.state,
                 performance: test.performance.toString(),
                 defect: test.defect,
+                dscsip: InetAddress.localHost.hostName,
+                dcsaut: System.properties.'user.name',
+                commandLine: results.commandline,
+                date: results.date,
+                time: results.time,
             )
         }
     }
