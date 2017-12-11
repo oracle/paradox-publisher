@@ -25,6 +25,7 @@ class PublishToInfinity implements Publisher {
             .findAll { it.value }
             .collectEntries { [it.key, URLEncoder.encode(it.value as String, 'UTF-8')] }
             .collect { "$it.key=$it.value" }.join('&')
+        log.info "Sending ${config.scsUrl}?$queryString"
         scs.get(uri: "$config.scsUrl?$queryString", headers: ['User-Agent': 'InfinityParadoxPublisher'])
     }
 
@@ -38,13 +39,14 @@ class PublishToInfinity implements Publisher {
         scs = new RESTClient(config.scsUrl).with { parser.'image/gif' = parser.defaultParser; it }
         log.info "Fetching results from ${auto.uri}/results/$assemblyName/$executionGuid ..."
         def results = auto.get(uri: "${auto.uri}/results/$assemblyName/$executionGuid").data
-        log.info "Results = $results"
+        log.debug "Results = $results"
 
-        //Send Test Results
+        // Send Test Results
+        log.info "Result Count = ${results.tests.size()}"
         for (test in results.tests) {
             sendEvent(
                 'wt.co_f': executionGuid,
-                dcsuri: test.name.replaceAll('\\.', '/'),
+                'page-uri': test.name.replaceAll('\\.', '/'),
                 suiteName: assemblyName,
                 environment: results.environment,
                 testName: test.name,
@@ -52,8 +54,8 @@ class PublishToInfinity implements Publisher {
                 state: test.state,
                 performance: test.performance.toString(),
                 defect: test.defect,
-                dscsip: InetAddress.localHost.hostName,
-                dcsaut: System.properties.'user.name',
+                'client-ip': InetAddress.localHost.hostName,
+                'authenticated-username': System.properties.'user.name',
                 commandLine: results.commandline,
                 date: results.date,
                 time: results.time,
