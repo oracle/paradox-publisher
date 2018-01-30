@@ -44,22 +44,23 @@ class PublishToInfinity implements Publisher {
         // Send Test Results
         log.info "Result Count = ${results.tests.size()}"
         for (test in results.tests) {
-            sendEvent(
+            def evt = [
                 'wt.co_f': executionGuid,
-                'page-uri': test.name.replaceAll('\\.', '/'),
                 suiteName: assemblyName,
                 environment: results.environment,
-                testName: test.name,
-                'wt.cg_n': test.labels.join(';'),
+                testName: test.name ?: '',
+                'page-uri': test.name.replaceAll('\\.', '/'),
                 state: test.state,
-                performance: test.performance.toString(),
-                defect: test.defect,
                 'client-ip': InetAddress.localHost.hostName,
                 'authenticated-username': System.properties.'user.name',
                 commandLine: results.commandline,
                 date: results.date,
                 time: results.time,
-            )
+            ]
+            if (test.labels) { evt << [ 'wt.cg_n': test.labels.join(';') ] }
+            if (test.performance) { evt << [ performance: test.performance.toString() ] }
+            if (test.defect) { evt << [ defect: test.defect ] }
+            sendEvent(evt)
         }
     }
 }
