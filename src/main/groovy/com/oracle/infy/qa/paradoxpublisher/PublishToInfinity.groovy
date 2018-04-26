@@ -18,7 +18,7 @@ class PublishToInfinity implements Publisher {
 
     def sendEvent(Map event) {
         event << [
-            dcsref: 'paradox',
+            referrer: 'paradox',
             publisherVersion: PUBLISHER_VERSION,
         ]
         def queryString = event
@@ -60,7 +60,11 @@ class PublishToInfinity implements Publisher {
             if (test.labels) { evt << [ 'wt.cg_n': test.labels.join(';') ] }
             if (test.performance) { evt << [ performance: test.performance.toString() ] }
             if (test.defect) { evt << [ defect: test.defect ] }
-            sendEvent(evt)
+            try {
+                sendEvent(evt)
+            } catch (HttpResponseException ex) {
+                log.error ("Was unable to send event to Infinity.\ntestName: ${test.name}\nException: $ex")
+            }
         }
     }
 }
