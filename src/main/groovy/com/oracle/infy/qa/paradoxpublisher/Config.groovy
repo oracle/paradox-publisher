@@ -12,6 +12,8 @@ class Config {
         couchUrl = config.couchUrl
         jiraUrl = config.jiraUrl
         scsUrl = config.scsUrl
+        scsRequestType = config.scsRequestType
+        scsPostBatchSize = config.scsPostBatchSize
         jiraUsername = config.jiraUsername
         jiraPassword = config.jiraPassword
         zapiUrl = config.zapiUrl
@@ -20,12 +22,23 @@ class Config {
         hipchatToken = config.hipchatToken
         hipchatUrl = config.hipchatUrl
         hipchatRoomId = config.hipchatRoomId
+        if (config.proxy) {
+            proxy = [
+                host: config.proxy.host,
+                port: config.proxy.port,
+                scheme: config.proxy.scheme
+            ]
+        } else {
+            proxy = null
+        }
     }
 
     String autoUrl
     String couchUrl
     String jiraUrl
     String scsUrl
+    String scsRequestType
+    int scsPostBatchSize
     String jiraUsername
     String jiraPassword
     String zapiUrl
@@ -34,4 +47,5 @@ class Config {
     String hipchatToken
     String hipchatUrl
     String hipchatRoomId
+    Map<String, ?> proxy
 }
