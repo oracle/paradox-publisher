@@ -4,6 +4,7 @@ couchUrl = ''
 jiraUrl = ''
 scsUrl = ''
 scsRequestType = ''
+scsPostBatchSize = 0
 zapiUrl = ''
 jiraUsername = ''
 jiraPassword = ''

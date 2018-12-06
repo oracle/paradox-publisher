@@ -13,6 +13,7 @@ class Config {
         jiraUrl = config.jiraUrl
         scsUrl = config.scsUrl
         scsRequestType = config.scsRequestType
+        scsPostBatchSize = config.scsPostBatchSize
         jiraUsername = config.jiraUsername
         jiraPassword = config.jiraPassword
         zapiUrl = config.zapiUrl
@@ -37,6 +38,7 @@ class Config {
     String jiraUrl
     String scsUrl
     String scsRequestType
+    int scsPostBatchSize
     String jiraUsername
     String jiraPassword
     String zapiUrl

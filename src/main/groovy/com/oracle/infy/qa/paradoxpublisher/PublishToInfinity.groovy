@@ -33,7 +33,7 @@ class PublishToInfinity implements Publisher {
 
     def sendEvents(List<Map<String, ?>> events) {
         log.info "Preparing to POST ${events.size()} events to ${config.scsUrl}"
-        List<List<Map<String, ?>>> subLists = events.collate(1000)
+        List<List<Map<String, ?>>> subLists = events.collate(config.scsPostBatchSize)
         subLists.each { sl ->
             def body = serializeEvents(sl)
             log.info "Sending ${sl.size()} events to ${config.scsUrl}"
@@ -56,15 +56,17 @@ class PublishToInfinity implements Publisher {
 
     }
 
-    def publish(String assemblyName, String executionGuid) {
+    def initializeRestClients() {
         if (!config.with { autoUrl && scsUrl && scsRequestType }) {
             log.warn "Missing config values: unable to execute ${this.getClass().name}"
             return null
-        }
-
-        if (!config.with { scsRequestType == 'POST' || scsRequestType == 'GET' }) {
-            log.warn "Invalid scsRequestType value: ${config.scsRequestType}, expected 'POST' or 'GET' " +
-                "unable to execute ${this.getClass().name}"
+        } else if (!config.with {
+            ( scsRequestType == 'POST' && scsPostBatchSize > 0 ) ||
+                scsRequestType == 'GET' }) {
+            log.warn """Invalid scsRequestType or scsPostBatchSize values:
+Expected scsRequestType = 'POST' or 'GET', received ${config.scsRequestType}
+Expected scsPostBatchSize > 0 if scsRequestType = 'POST': received ${config.scsPostBatchSize}
+unable to execute ${this.getClass().name}"""
             return null
         }
 
@@ -74,6 +76,10 @@ class PublishToInfinity implements Publisher {
             auto.setProxy(config.proxy.host, config.proxy.port, config.proxy.scheme)
             scs.setProxy(config.proxy.host, config.proxy.port, config.proxy.scheme)
         }
+    }
+
+    def publish(String assemblyName, String executionGuid) {
+        initializeRestClients()
 
         log.info "Fetching results from ${auto.uri}/results/$assemblyName/$executionGuid ..."
         def results = auto.get(uri: "${auto.uri}/results/$assemblyName/$executionGuid").data
@@ -135,7 +141,7 @@ class PublishToInfinity implements Publisher {
 
         [
             static: commonMap,
-            events: events.collect { e -> e.findAll { !(it.key in ['dcsId', 'userAgent', 'referer']) } - commonMap }
+            events: events.collect { e -> e.findAll { !(it.key in ['userAgent', 'referer']) } - commonMap }
         ]
     }
 }
