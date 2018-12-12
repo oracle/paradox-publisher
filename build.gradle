@@ -39,7 +39,7 @@ mainClassName = 'NoClassName'
 }
 
 group = 'com.oracle.infy.qa.paradoxpublisher'
-version = '2.0.3'
+version = '2.0.5'
 
 distributions {
     main {
