@@ -71,7 +71,7 @@ unable to execute ${this.getClass().name}"""
         }
 
         auto = new RESTClient(config.autoUrl, 'application/json')
-        scs = new RESTClient(config.scsUrl).with { parser.'image/gif' = parser.defaultParser; it }
+        scs = new RESTClient(config.scsUrl)
         if (config.proxy) {
             auto.setProxy(config.proxy.host, config.proxy.port, config.proxy.scheme)
             scs.setProxy(config.proxy.host, config.proxy.port, config.proxy.scheme)
