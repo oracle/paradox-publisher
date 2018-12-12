@@ -4,6 +4,7 @@ import groovy.json.JsonBuilder
 import groovy.util.logging.Log4j
 import groovyx.net.http.HttpResponseException
 import groovyx.net.http.RESTClient
+import groovyx.net.http.ContentType
 
 /**
  * Publish results to infinity analytics
@@ -43,6 +44,7 @@ class PublishToInfinity implements Publisher {
                 scs.post(
                     uri: config.scsUrl,
                     body: body,
+                    requestContentType: ContentType.JSON,
                     headers: [
                         'User-Agent': 'InfinityParadoxPublisher',
                         'Content-Type': 'application/json',
