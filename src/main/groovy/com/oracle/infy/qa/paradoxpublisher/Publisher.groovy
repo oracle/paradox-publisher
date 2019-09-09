@@ -1,11 +1,11 @@
 package com.oracle.infy.qa.paradoxpublisher
 
-import groovy.util.logging.Log4j
+import groovy.util.logging.Log4j2
 
 /**
  * Encapsulates the standard publisher pattern that accepts an assembly name and a guid.
  */
-@Log4j
+@Log4j2
 trait Publisher {
     Config config = new Config()
 

@@ -1,7 +1,7 @@
 package com.oracle.infy.qa.paradoxpublisher
 
 import groovy.json.JsonBuilder
-import groovy.util.logging.Log4j
+import groovy.util.logging.Log4j2
 import groovyx.net.http.HttpResponseException
 import groovyx.net.http.RESTClient
 import groovyx.net.http.ContentType
@@ -9,7 +9,7 @@ import groovyx.net.http.ContentType
 /**
  * Publish results to infinity analytics
  */
-@Log4j
+@Log4j2
 class PublishToInfinity implements Publisher {
     static final PUBLISHER_VERSION = '0.2'
     RESTClient auto

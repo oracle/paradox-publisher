@@ -1,11 +1,11 @@
 package com.oracle.infy.qa.paradoxpublisher
 
-import groovy.util.logging.Log4j
+import groovy.util.logging.Log4j2
 
 /**
  * Runs a test suite, publishes the results to jira, couchdb and infinity, and emails interested parties
  */
-@Log4j
+@Log4j2
 class RunPublishNotify {
     def config = new Config()
     static void main(String[] args) {

@@ -1,12 +1,12 @@
 package com.oracle.infy.qa.paradoxpublisher
 
-import groovy.util.logging.Log4j
+import groovy.util.logging.Log4j2
 import groovyx.net.http.RESTClient
 
 /**
  * Fetch a cycle from jira and email
  */
-@Log4j
+@Log4j2
 class EmailCycleResults {
     def config = new Config()
 
