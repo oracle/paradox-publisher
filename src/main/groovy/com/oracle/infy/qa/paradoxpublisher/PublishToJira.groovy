@@ -1,12 +1,12 @@
 package com.oracle.infy.qa.paradoxpublisher
 
-import groovy.util.logging.Log4j
+import groovy.util.logging.Log4j2
 import groovyx.net.http.*
 
 /**
  * Publishes results to jira via zapi into a new jira test cycle
  */
-@Log4j
+@Log4j2
 class PublishToJira implements Publisher {
     RESTClient auto
 

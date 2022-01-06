@@ -1,6 +1,6 @@
 package com.oracle.infy.qa.paradoxpublisher
 
-import groovy.util.logging.Log4j
+import groovy.util.logging.Log4j2
 import groovyx.net.http.RESTClient
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary
 import org.apache.commons.math3.stat.inference.TestUtils
@@ -8,7 +8,7 @@ import org.apache.commons.math3.stat.inference.TestUtils
 /**
  * Updates existing results in couchdb with augmented data such as known bug and performance information
  */
-@Log4j
+@Log4j2
 class PrePublish implements Publisher {
     RESTClient auto
 

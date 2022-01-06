@@ -1,12 +1,12 @@
 package com.oracle.infy.qa.paradoxpublisher
 
-import groovy.util.logging.Log4j
+import groovy.util.logging.Log4j2
 import groovyx.net.http.RESTClient
 
 /**
  * Runs the tests by sending an http request to paradox-tester and then waits for the suite to finish
  */
-@Log4j
+@Log4j2
 class RunTests {
     def config = new Config()
 

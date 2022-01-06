@@ -1,12 +1,12 @@
 package com.oracle.infy.qa.paradoxpublisher
 
-import groovy.util.logging.Log4j
+import groovy.util.logging.Log4j2
 import groovyx.net.http.RESTClient
 
 /**
  * Publishes results to a configurable hipchat channel
  */
-@Log4j
+@Log4j2
 class PublishToHipchat implements Publisher {
     RESTClient auto
 
