@@ -1,4 +1,6 @@
+# (Private) @Godmodes
 paradox-publisher
 =================
 
-Zephyr for Jira integration with Automation
+©®©DelawareLLC®
+this file can not be edited and is forbidden ⛔🚫⛔🔀⛔
